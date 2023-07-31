@@ -1,0 +1,596 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Iphone.md</title><style></style></head><body id="preview">
+<h3 class="code-line" data-line-start=0 data-line-end=1><a id="Verfasst_von_Selma_Behremovic1177291_Muhammad_Hassan_Sultan1365427_Karan_Pratik_Kumar1343915_0"></a>Verfasst von: Selma Behremovic(1177291), Muhammad Hassan Sultan(1365427), Karan Pratik Kumar(1343915)</h3>
+<h1 class="code-line" data-line-start=1 data-line-end=2><a id="InformatikProjekt_WebserverBetrieb_1"></a>Informatik-Projekt Webserver-Betrieb</h1>
+<h1 class="code-line" data-line-start=3 data-line-end=4><a id="Iphone_3"></a>Iphone</h1>
+<h1 class="code-line" data-line-start=5 data-line-end=6><a id="Einleitung_5"></a>Einleitung</h1>
+<p class="has-line-data" data-line-start="7" data-line-end="9">Die vorliegende Dokumentation stellt eine umfassende Anleitung dar, wie Runit als Init-System und Prozess-Supervisor in Verbindung mit dem Apache HTTP Server auf einem FreeBSD-Betriebssystem eingesetzt werden kann. Runit ist ein leichtes, aber äußerst leistungsstarkes Dienstprogramm, das auf Unix-ähnlichen Betriebssystemen wie Linux und BSD verwendet wird. Es bietet automatische Überwachung und Dienstwiederherstellung im Falle eines Ausfalls und ermöglicht die sichere Verwaltung von Prozessen und Diensten, einschließlich des Apache-Webservers.<br>
+Der Apache-HTTP-Server ist einer der am weitesten verbreiteten Webserver der Welt und wird von vielen Websites zum Teilen von Inhalten im Web verwendet. Um einen Webserver wie Apache erfolgreich auf dem FreeBSD-Betriebssystem zu betreiben, ist es wichtig, dass er stabil und zuverlässig ist. Die Verwendung von Runit und Apache HTTP Server auf dem FreeBSD-Betriebssystem bietet die ultimative Lösung für eine leistungsstarke Webhosting-Umgebung.</p>
+<h1 class="code-line" data-line-start=10 data-line-end=11><a id="Was_ist_FreeBSD_10"></a>Was ist FreeBSD</h1>
+<p class="has-line-data" data-line-start="12" data-line-end="13">FreeBSD ist ein UNIX-Betriebssystem mit offenem Standard, das auf verschiedenen Architekturen wie X86 (32-Bit und 64-Bit), Arm, Aarch64, RISC-V, MIPS, Powerpc und Sun Ultrassparpc läuft. Es bietet viele Funktionen wie Multitasking, Speicherschutz, virtuellen Speicher, Versprechen, SMP und Desktop mit X Windows, KDE und GNOME.</p>
+<h1 class="code-line" data-line-start=14 data-line-end=15><a id="Funktionen_von_FreeBSD_14"></a>Funktionen von FreeBSD:</h1>
+<ul>
+<li class="has-line-data" data-line-start="16" data-line-end="17">Kostenlose Open-Source-Lizenz: Der Quellcode kann ohne Copyleft-Einschränkungen frei geändert und erweitert werden.</li>
+<li class="has-line-data" data-line-start="17" data-line-end="18">Zuverlässige TCP/IP-Netzwerke: FreeBSD implementiert gängige und branchenübliche Protokolle sowohl für Server- als auch für Routing-/Firewall-Aufgaben.</li>
+<li class="has-line-data" data-line-start="18" data-line-end="19">Vollständig integrierte OpenZFS-Unterstützung: einschließlich Root-on-ZFS, ZFS usw.</li>
+<li class="has-line-data" data-line-start="19" data-line-end="21">Erweiterte Sicherheitsfunktionen, von der obligatorischen Zugriffskontrolle (MAC) bis hin zu Capsicum- und Sandboxing-Mechanismen.</li>
+</ul>
+<p class="has-line-data" data-line-start="21" data-line-end="22">Es steht eine breite Palette an Software zur Verfügung, darunter über 30.000 vorkonfigurierte Pakete und verschiedene Ports für die Erstellung individueller Software. FreeBSD basiert auf dem CSRG UC Berkeley 4.4BSD LiteRelease. Es gibt viele Anwendungen, für die es verwendet werden kann, darunter Desktop-Computing, Webdienste, Bildung, Forschung, Netzwerke, Gebäudesysteme und Softwareentwicklung.</p>
+<h1 class="code-line" data-line-start=23 data-line-end=24><a id="Installation_des_Apache_Webservers_23"></a>Installation des Apache Webservers</h1>
+<ul>
+<li class="has-line-data" data-line-start="24" data-line-end="26">Apache Webserver installieren</li>
+</ul>
+<p class="has-line-data" data-line-start="26" data-line-end="27">Für die Installation des Apache Webservers wird folgender Befehl aufgeführt:</p>
+<pre><code class="has-line-data" data-line-start="28" data-line-end="30">pkg install apache24
+</code></pre>
+<p class="has-line-data" data-line-start="30" data-line-end="31">Der Paketmanager wird nun den Apache Webserver und alle erforderlichen Abhängigkeiten herunterladen und installieren.</p>
+<ul>
+<li class="has-line-data" data-line-start="32" data-line-end="34">Automatischer Start des Apache-Dienstes beim Systemstart:</li>
+</ul>
+<p class="has-line-data" data-line-start="34" data-line-end="35">Um den Apache-Dienst automatisch beim Booten des Systems zu starten, wird die folgende Zeile zur Datei /etc/rc.conf hinzugefügt:</p>
+<pre><code class="has-line-data" data-line-start="36" data-line-end="38">apache24_enable=YES
+</code></pre>
+<p class="has-line-data" data-line-start="38" data-line-end="39">Diese Konfiguration bewirkt, dass der Apache-Dienst beim nächsten Systemstart automatisch gestartet wird.</p>
+<ul>
+<li class="has-line-data" data-line-start="40" data-line-end="42">Apache Webserver starten</li>
+</ul>
+<p class="has-line-data" data-line-start="42" data-line-end="43">Nach der Installation sollte der Apache Webserver automatisch gestartet werden. Falls nicht, kann dieser manuell gestartet werden:</p>
+<ul>
+<li class="has-line-data" data-line-start="44" data-line-end="45">Um den Apache Webserver zu starten, wird folgender Befehl ausgeführt:</li>
+</ul>
+<pre><code class="has-line-data" data-line-start="46" data-line-end="48">service apache24 start
+</code></pre>
+<p class="has-line-data" data-line-start="48" data-line-end="49">Der Apache-Dienst wird gestartet und ist nun einsatzbereit, um HTTP-Anfragen von Clients zu verarbeiten.</p>
+<ul>
+<li class="has-line-data" data-line-start="50" data-line-end="52">Stoppen des Apache-Dienstes:</li>
+</ul>
+<p class="has-line-data" data-line-start="52" data-line-end="53">Falls der Apache-Dienst gestoppt werden soll, wird der Befehl verwendet:</p>
+<pre><code class="has-line-data" data-line-start="54" data-line-end="56">service apache24 stop
+</code></pre>
+<p class="has-line-data" data-line-start="56" data-line-end="57">Der Apache-Dienst wird beendet und nimmt keine weiteren Anfragen mehr entgegen.</p>
+<ul>
+<li class="has-line-data" data-line-start="58" data-line-end="60">Neustarten des Apache-Dienstes:</li>
+</ul>
+<p class="has-line-data" data-line-start="60" data-line-end="61">Wenn Änderungen an der Konfiguration vorgenommen wurden oder der Apache-Dienst aktualisiert werden soll, kann dieser mit folgendem Befehl neu gestartet werden:</p>
+<pre><code class="has-line-data" data-line-start="62" data-line-end="64">service apache24 restart
+</code></pre>
+<p class="has-line-data" data-line-start="64" data-line-end="65">Dadurch wird der Apache-Dienst gestoppt und anschließend automatisch neu gestartet.</p>
+<ul>
+<li class="has-line-data" data-line-start="66" data-line-end="68">Status des Apache-Dienstes überprüfen:</li>
+</ul>
+<p class="has-line-data" data-line-start="68" data-line-end="69">Um den aktuellen Status des Apache-Dienstes anzuzeigen, wird folgender Befehl verwendet:</p>
+<pre><code class="has-line-data" data-line-start="70" data-line-end="72">service apache24 status
+</code></pre>
+<p class="has-line-data" data-line-start="72" data-line-end="73">Der Befehl zeigt den aktuellen Status des Dienstes an, ob er läuft oder gestoppt ist.</p>
+<p class="has-line-data" data-line-start="74" data-line-end="75">service: Dieser FreeBSD-Befehl wird zur Steuerung von Systemdiensten verwendet. Es ermöglicht es, Systemdienste zu starten, anzuhalten, fortzusetzen oder deren Status zu überprüfen.</p>
+<p class="has-line-data" data-line-start="76" data-line-end="77">apache24: Dies ist der Name des Dienstes für den Apache Webserver auf FreeBSD. Der Dienstename ist auf FreeBSD spezifisch und kann von dem auf anderen Betriebssystemen abweichen.</p>
+<ul>
+<li class="has-line-data" data-line-start="78" data-line-end="80">Konfiguration des Apache Webserver</li>
+</ul>
+<p class="has-line-data" data-line-start="80" data-line-end="81">Die primäre Apache-HTTP-Server-Konfigurationsdatei heißt httpd. conf, die sich normalerweise auf FreeBSD unter “/usr/local/etc/apache24/httpd.conf” befindet. Mehrere Einstellungen in dieser Datei regeln das Verhalten des Apache-Servers.</p>
+<p class="has-line-data" data-line-start="82" data-line-end="83">Im Folgenden sind die wichtigsten Abschnitte und Konfigurationsoptionen aufgeführt, die in der Datei httpd.conf zu finden sind:</p>
+<ol>
+<li class="has-line-data" data-line-start="84" data-line-end="85">ServerRoot: Definieren Sie den Installationspfad für den Apache-Server.</li>
+<li class="has-line-data" data-line-start="85" data-line-end="86">ServerName: Der vollständig qualifizierte Domänenname des Servers. Es wird verwendet, um URLs relativ zu sich selbst und zu Einstellungen auf Serverebene zu generieren.</li>
+<li class="has-line-data" data-line-start="86" data-line-end="87">Listen: Der Port oder die IP-Adresse, die der Server abhört. Dies sind in der Regel Port 80 (HTTP) und 443 (HTTPS).</li>
+<li class="has-line-data" data-line-start="87" data-line-end="88">LoadModule: Hier werden Apache-Module aktiviert, die zusätzliche Funktionalität bereitstellen. Beispielsweise ermöglicht LoadModule rewrite_module module/mod_rewrite.so das Neuschreiben von Modulen.</li>
+<li class="has-line-data" data-line-start="88" data-line-end="89">DocumentRoot: Ein Verzeichnis ist der Verzeichniseinstiegspunkt einer Website oder Webanwendung.</li>
+<li class="has-line-data" data-line-start="89" data-line-end="90">Directory: In diesem Abschnitt kann der DocumentRoot und die Ordneroptionen anderer Ordner konfiguriert werden. Dazu gehören Einstellungen wie Berechtigungen, Zugriffskontrolle und andere ordnerbezogene Einstellungen.</li>
+<li class="has-line-data" data-line-start="90" data-line-end="91">VirtualHost: Hier wird die virtuelle Hostkonfiguration definiert, um mehrere Websites auf einem einzigen Server zu hosten. Jeder virtuelle Host kann seinen eigenen DocumentRoot, Hostnamen, Port und andere Einstellungen haben.</li>
+<li class="has-line-data" data-line-start="91" data-line-end="92">ErrorLog: Dies ist der Pfad zu der Datei, in der Apache die Fehlermeldung protokolliert.</li>
+<li class="has-line-data" data-line-start="92" data-line-end="93">CustomLog: Dies ist der Pfad zu der Datei, in der Apache Zugriffsprotokolle speichert.</li>
+<li class="has-line-data" data-line-start="93" data-line-end="94">ServerSignature: Gibt an, ob die Serversignatur in der Serverantwort angezeigt werden soll. Es kann auf „Ein“ eingestellt werden. oder ausschalten&quot;.</li>
+<li class="has-line-data" data-line-start="94" data-line-end="96">DirectoryIndex: Gibt die Standarddatei an, die der Server bereitstellen soll, wenn in der URL kein Dateiname angegeben ist (z.<br>
+B.: index.html, index.php).</li>
+<li class="has-line-data" data-line-start="96" data-line-end="97">MIME-Typen: In diesem Fall wird die Dateierweiterung mit den entsprechenden MIME-Typen verknüpft, um dem Browser mitzuteilen, wie er bestimmte Dateitypen interpretieren soll.</li>
+<li class="has-line-data" data-line-start="97" data-line-end="98">AllowOverride: Ermöglicht es zu steuern, welche Einstellungen in der .htaccess-Datei im Verzeichnis überschrieben werden können. Dies gilt insbesondere bei der Verwendung verzeichnisspezifischer Konfigurationen.</li>
+<li class="has-line-data" data-line-start="98" data-line-end="100">SSL-Konfiguration: Wenn der Apache-Server HTTPS unterstützt, enthält die Datei httpd.conf auch SSL/TLS-Zertifikatseinstellungen und Verschlüsselungskonfiguration.</li>
+</ol>
+<ul>
+<li class="has-line-data" data-line-start="100" data-line-end="102">Testen des Apache Webserver</li>
+</ul>
+<p class="has-line-data" data-line-start="102" data-line-end="103">Der Apache Webserver sollte nun einsatzbereit sein. Anschließend kann im Webbrowser &quot;<a href="http://localhost/">http://localhost/</a>&quot; eingegeben werden. Dadurch wird standardmäßig die Homepage des Apache-Webservers angezeigt.</p>
+<h1 class="code-line" data-line-start=104 data-line-end=105><a id="Erklrung_der_rcconfDatei_104"></a>Erklärung der rc.conf-Datei</h1>
+<p class="has-line-data" data-line-start="106" data-line-end="108">Die rc.conf ist eine wichtige Konfigurationsdatei auf FreeBSD-Systemen, mit der verschiedenen Optionen und Konfigurationen angegeben werden können, die sich auf den Betrieb des Betriebssystems auswirken. Die Datei rc.conf enthält beschreibende Informationen zum lokalen Hostnamen, Konfigurationsdetails potenzieller Netzwerkschnittstellen und die Dienste, die beim ersten Systemstart ausgeführt werden. Bei Neuinstallationen wird die Datei rc.conf normalerweise vom Systeminstallationsprogramm ausgeführt. Der Zweck von rc.conf besteht nicht darin, Befehle auszuführen oder Aktionen direkt beim Systemstart auszuführen. Stattdessen wird es von verschiedenen gängigen Init-Skripten zu /etc hinzugefügt, wodurch deren Innenfunktionen von den dort gefundenen Einstellungen abhängig sind.<br>
+Sie befindet sich normalerweise im Verzeichnis /etc und wird von Benutzern mit Administratorrechten bearbeitet, um das System an ihre spezifischen Anforderungen anzupassen.</p>
+<p class="has-line-data" data-line-start="109" data-line-end="110">Die rc.conf beinhaltet:</p>
+<pre><code class="has-line-data" data-line-start="111" data-line-end="114">- In der rc.conf-Datei
+hostname=&quot;labpc-116&quot;
+</code></pre>
+<p class="has-line-data" data-line-start="114" data-line-end="115">Der Name des Systems im Netzwerk wird durch seinen Hostnamen angegeben.Unter diesem Namen wird das System bei der Kommunikation mit anderen Geräten erkannt und identifiziert. In diesem Fall lautet der Hostname „labpc-116“.</p>
+<pre><code class="has-line-data" data-line-start="116" data-line-end="119">- In der rc.conf-Datei
+keymap=&quot;de.kbd
+</code></pre>
+<p class="has-line-data" data-line-start="119" data-line-end="120">Die Keymap-Variable gibt die Keymap für das System an. „de.kbd“ steht für deutsches Tastaturlayout.</p>
+<pre><code class="has-line-data" data-line-start="121" data-line-end="124">-In der rc.conf-Datei
+ifconfig_em0=&quot;DHCP
+</code></pre>
+<p class="has-line-data" data-line-start="124" data-line-end="125">Die Variable ifconfig_em0 definiert die Netzwerkkonfiguration für die em0-Netzwerkschnittstelle. In diesem Fall ist die Schnittstelle auf DHCP (Dynamic Host Configuration Protocol) eingestellt. Dies bedeutet, dass der DHCP-Server des Netzwerks automatisch die IP-Adresse, die Subnetzmaske und das Gateway für das Netzwerk erhält. Somit wird die IP-Adresse, die Subnetzmaske und das Gateway des Netzwerks automatisch vom DHCP-Server bezogen, der mit dem Netzwerk verbunden ist.</p>
+<pre><code class="has-line-data" data-line-start="126" data-line-end="129">- In der rc.conf-Datei
+ifconfig_em0_ipv6=&quot;inet6 accept_rtadv
+</code></pre>
+<p class="has-line-data" data-line-start="129" data-line-end="130">Wie die vorherige Variable aktiviert diese Variable IPv6-Einstellungen für die em0-Schnittstelle. „inet6“ zeigt an, dass IPv6 aktiviert ist und „accept_rtadv“ zeigt an, dass das System Router-Advertisement-Pakete akzeptiert, um die automatische Konfiguration der IPv6-Adresse zu ermöglichen.</p>
+<pre><code class="has-line-data" data-line-start="131" data-line-end="134">- In der rc.conf-Datei
+sshd_enable=&quot;YES
+</code></pre>
+<p class="has-line-data" data-line-start="134" data-line-end="135">Mit sshd_enable wird der SSH-Dienst aktiviert. „YES“ bedeutet, dass der SSH-Server beim Systemstart läuft. Mit SSH können Benutzer eine sichere und verschlüsselte Verbindung zum System herstellen, um Befehle auszuführen und Dateien aus der Ferne zu übertragen.</p>
+<pre><code class="has-line-data" data-line-start="136" data-line-end="139"> - In der rc.conf-Datei
+ dumpdev=&quot;AUTO&quot;
+</code></pre>
+<p class="has-line-data" data-line-start="139" data-line-end="140">Die Variable dumpdev steuert das Verhalten des Crash-Dump-Speichers. Bei einem Crash-Dump handelt es sich um eine Aufzeichnung des Systemspeichers, wenn ein Absturz oder Fehler auftritt. Wenn „AUTO“ ausgewählt ist, ist die automatische Erkennung aktiviert und das System kann automatisch Absturzdumps generieren. Bei der Einstellung „NO“ wird das Absturz-Rendering deaktiviert.</p>
+<pre><code class="has-line-data" data-line-start="141" data-line-end="144"> - In der rc.conf-Datei
+ apache24_enable=&quot;yes
+</code></pre>
+<p class="has-line-data" data-line-start="144" data-line-end="145">Konkret bedeutet apache24_enable=“yes”, dass der Apache HTTP-Server beim Systemstart automatisch startet. Wenn diese Option auf „YES“ gesetzt ist, wird der Apache-Dienst bei jedem Systemstart automatisch aktiviert und gestartet.</p>
+<h1 class="code-line" data-line-start=146 data-line-end=147><a id="Beschreibung_des_Aufsetzens_des_Webservers_unter_den_Supervise_Tools_146"></a>Beschreibung des Aufsetzens des Webservers unter den Supervise Tools</h1>
+<p class="has-line-data" data-line-start="148" data-line-end="154">Im Rahmen des Projekts wurde die Entscheidung getroffen, Runit von Gerrit Pape als Lösung für das Daemon-Management unter FreeBSD zu nutzen. Runit stellt eine leistungsfähige Alternative zu herkömmlichen Init-Systemen dar und bietet interessante Funktionen.<br>
+Im Gegensatz zu herkömmlichen Techniken, bei denen ein Daemon normalerweise durch eine einzelne Datei dargestellt wird, verwendet Runit ein Verzeichnis zur Darstellung des Daemons. Dadurch können Konfigurationsdateien und Verwaltungstools zentral gespeichert werden, was die Verwaltung und Wartung des Daemons vereinfacht.<br>
+Der große Vorteil von Runit besteht darin, dass es nicht nur als Daemon-Manager fungiert, sondern auch als Ersatz für den Initialisierungsprozess verwendet werden kann. Dadurch wird das Systemstart- und -abschaltverhalten optimiert und verbessert.<br>
+Runit verfolgt den gleichen Ansatz wie Daemontools von Dan Bernstein und S6 von Laurent Berko, wobei die verknüpften Prozesse asynchron sind. Dadurch laufen Prozesse unabhängig voneinander ab und das Starten oder Stoppen eines Prozesses hat keine Auswirkungen auf andere Prozesse. Dies verbessern die Stabilität und Zuverlässigkeit des Systems.<br>
+Die Verwendung von Runit bietet eine leistungsstarke und flexible Methode zur Verwaltung von Daemons und ermöglicht eine effiziente Verwaltung verschiedener Dienste. Durch die klare Trennung der Dienstkonfigurationen in separate Ordner entsteht eine saubere und gut organisierte Umgebung.<br>
+Abschließend hat sich die Entscheidung, Runit in diesem Projekt einzusetzen, als äußerst vorteilhaft erwiesen. Mit Runit wurde eine solide und gut organisierte Infrastruktur für Daemons geschaffen, um eine reibungslose Verwaltung und einen zuverlässigen Betrieb der Dienste zu gewährleisten.</p>
+<h1 class="code-line" data-line-start=155 data-line-end=156><a id="Installation_und_Konfiguration_von_Runit_auf_FreeBSD_fr_effizientes_DaemonManagement_155"></a>Installation und Konfiguration von Runit auf FreeBSD für effizientes Daemon-Management</h1>
+<p class="has-line-data" data-line-start="157" data-line-end="158">Im Folgenden wird eine ausführliche Anleitung zur Konfiguration von Runit auf einem FreeBSD-System präsentiert:</p>
+<ul>
+<li class="has-line-data" data-line-start="159" data-line-end="161">Schritt 1: Erstellen eines Verzeichnisses und Berechtigungen setzen</li>
+</ul>
+<p class="has-line-data" data-line-start="161" data-line-end="162">Zunächst wird ein Verzeichnis mit dem Namen “package” im Stammverzeichnis (/) von FreeBSD erstellt. Es dient der Aufbewahrung von heruntergeladenen Paketen und Software.</p>
+<pre><code class="has-line-data" data-line-start="163" data-line-end="166">mkdir -p /package
+chmod 1755 /package
+</code></pre>
+<p class="has-line-data" data-line-start="167" data-line-end="168">Die Erstellung des Verzeichnisses “/package” erfolgt mittels des Befehls “mkdir -p”. Die Option “-p” sorgt dafür, dass das Verzeichnis erstellt wird, auch wenn es bereits existiert. Anschließend werden die Berechtigungen des Verzeichnisses mit “chmod 1755” gesetzt. Dadurch wird sichergestellt, dass alle Benutzer das Verzeichnis lesen und ausführen können, jedoch nur der Root-Benutzer oder der Eigentümer das Recht haben, es zu beschreiben.</p>
+<ul>
+<li class="has-line-data" data-line-start="169" data-line-end="171">Schritt 2: Herunterladen und Entpacken von Runit</li>
+</ul>
+<p class="has-line-data" data-line-start="171" data-line-end="172">In dem vorliegenden Experiment wird der Webbrowser “lynx” im Terminal genutzt, um die Website &quot;<a href="http://smarden.org">http://smarden.org</a>&quot; aufzurufen und die Runit-Version 2.1.2 von dieser Webseite herunterzuladen.</p>
+<pre><code class="has-line-data" data-line-start="173" data-line-end="175">lynx http://smarden.org
+</code></pre>
+<p class="has-line-data" data-line-start="175" data-line-end="176">Nach dem Herunterladen der Datei “runit-2.1.2.tar.gz” wird sie im Verzeichnis “/package” gespeichert.</p>
+<pre><code class="has-line-data" data-line-start="177" data-line-end="181">cd /package
+gunzip runit-2.1.2.tar.gz
+tar -xpf runit-2.1.2.tar
+</code></pre>
+<p class="has-line-data" data-line-start="181" data-line-end="182">Mittels “gunzip” wird die Datei “runit-2.1.2.tar.gz” entkomprimiert und anschließend wird “tar -xpf” verwendet, um die Tar-Datei zu entpacken und die ursprüngliche Verzeichnisstruktur wiederherzustellen.</p>
+<ul>
+<li class="has-line-data" data-line-start="183" data-line-end="185">Schritt 3: Löschen alter Dateien</li>
+</ul>
+<p class="has-line-data" data-line-start="185" data-line-end="186">Nachdem die Datei erfolgreich entpackt wurde, wird die ursprüngliche komprimierte Datei gelöscht, um Platz zu sparen.</p>
+<pre><code class="has-line-data" data-line-start="187" data-line-end="189">rm runit-2.1.2.tar
+</code></pre>
+<p class="has-line-data" data-line-start="189" data-line-end="190">Durch “rm” entfernen wir die tar-Datei, da sie nicht mehr benötigt wird.</p>
+<ul>
+<li class="has-line-data" data-line-start="191" data-line-end="193">Schritt 4: Vorbereitung für die Installation</li>
+</ul>
+<p class="has-line-data" data-line-start="193" data-line-end="194">Im Verzeichnis “/package/admin/runit-2.1.2” befindet sich ein automatisch erstelltes Verzeichnis mit dem Namen “admin”.</p>
+<pre><code class="has-line-data" data-line-start="195" data-line-end="197">cd /package/admin/runit-2.1.2
+</code></pre>
+<p class="has-line-data" data-line-start="197" data-line-end="198">Die Ordnerstruktur wird so erstellt, um mögliche Konflikte mit anderen Paket-Installationen zu vermeiden und die Verwaltung zu vereinfachen.</p>
+<ul>
+<li class="has-line-data" data-line-start="199" data-line-end="201">Schritt 5: Installation von Runit</li>
+</ul>
+<p class="has-line-data" data-line-start="201" data-line-end="202">Zur Installation von Runit auf FreeBSD führen wir den Befehl “package/install” im Verzeichnis “/package/admin/runit-2.1.2” aus.</p>
+<pre><code class="has-line-data" data-line-start="203" data-line-end="206">cd /package/admin/runit-2.1.2
+package/install
+</code></pre>
+<p class="has-line-data" data-line-start="206" data-line-end="207">Das Verzeichnis “/package/admin/runit-2.1.2” enthält das Skript “install”, das ausgeführt wird, um Runit auf dem System zu installieren. Durch Ausführen dieses Skripts werden alle erforderlichen Schritte durchgeführt, um Runit zu kompilieren und zu installieren, einschließlich der Konfiguration von Runit für das FreeBSD-System.</p>
+<ul>
+<li class="has-line-data" data-line-start="208" data-line-end="210">Schritt 6: Anpassen und Kompilieren von Runit</li>
+</ul>
+<p class="has-line-data" data-line-start="210" data-line-end="211">In dem Verzeichnis “/package/admin/runit-2.1.2/src” sind die Konfigurationsdateien “conf-cc” und “conf-ld” zu finden. Dort wird der Eintrag “gcc” in beiden Dateien zu “cc” geändert, um den C-Compiler zu verwenden, der auf FreeBSD verfügbar ist.</p>
+<pre><code class="has-line-data" data-line-start="212" data-line-end="216">cd /package/admin/runit-2.1.2/src
+vi conf-cc
+vi conf-ld
+</code></pre>
+<p class="has-line-data" data-line-start="216" data-line-end="217">Das “make”-Tool, das für den Kompilierungsprozess benötigt wird, wird durch den Befehl “pkg install gmake” installiert:</p>
+<pre><code class="has-line-data" data-line-start="218" data-line-end="220">sudo pkg install gmake
+</code></pre>
+<p class="has-line-data" data-line-start="220" data-line-end="221">Nachdem das “make”-Tool erfolgreich installiert wurde, die Installation von Runit kann fortgesetzt werden. Um Runit auf einem FreeBSD-System zu installieren, navigiert man zum Verzeichnis “/package/admin/runit-2.1.2/src”, wo sich die Quellcode-Dateien von Runit befinden. Anschließend wird der Befehl “make” ausgeführt, um den Kompilierungsprozess zu starten und Runit zu erstellen:</p>
+<pre><code class="has-line-data" data-line-start="222" data-line-end="225">cd /package/admin/runit-2.1.2/src
+make
+</code></pre>
+<p class="has-line-data" data-line-start="225" data-line-end="226">Die Nutzung von “make” ermöglicht es uns, Runit direkt aus dem Quellcode zu kompilieren und somit eine maßgeschneiderte Installation für unser System durchzuführen.</p>
+<h1 class="code-line" data-line-start=227 data-line-end=228><a id="Anpassung_der_rclocalDatei_fr_Runit_227"></a>Anpassung der rc.local-Datei für Runit:</h1>
+<p class="has-line-data" data-line-start="229" data-line-end="230">Nachdem Runit erfolgreich installiert und die “run”-Dateien für die Dienste erstellt wurden, muss die rc.local-Datei angepasst werden, um Runit beim Systemstart zu starten und die Dienste in /var/service zu überwachen. Hier sind die Anpassung und Erklärung:</p>
+<p class="has-line-data" data-line-start="231" data-line-end="233">Öffnen der rc.local-Datei:<br>
+Es wird ein Texteditor verwendet, um die rc.local-Datei zu öffnen und die erforderlichen Anpassungen vorzunehmen: cd vi /etc/rc.local</p>
+<ul>
+<li class="has-line-data" data-line-start="234" data-line-end="236">Anpassung des PATHs:</li>
+</ul>
+<p class="has-line-data" data-line-start="236" data-line-end="237">Zu Beginn der rc.local-Datei wird eine Zeile hinzugefügt, um den Systempfad (PATH) anzupassen und das Verzeichnis /usr/local/bin hinzuzufügen. Dadurch wird sichergestellt, dass Runit und seine zugehörigen Binärdateien gefunden werden können:</p>
+<pre><code class="has-line-data" data-line-start="239" data-line-end="242">- In der rc.local-Datei
+PATH=/usr/local/bin:$PATH
+</code></pre>
+<ul>
+<li class="has-line-data" data-line-start="243" data-line-end="245">Starten von Runit und Diensten:</li>
+</ul>
+<p class="has-line-data" data-line-start="245" data-line-end="246">Nachdem der PATH angepasst wurde, wird folgender Befehl hinzugefügt, um Runit zu starten und die Dienste in /var/service zu überwachen:</p>
+<pre><code class="has-line-data" data-line-start="248" data-line-end="251">- In der rc.local-Datei
+csh -cf &quot;/command/runsvdir /var/service &amp;&quot;
+</code></pre>
+<p class="has-line-data" data-line-start="252" data-line-end="253">Erklärung: Der Befehl csh -cf wird verwendet, um einen C-Shell-Interpreter aufzurufen und das angegebene Kommando in demselben Kontext auszuführen. /command/runsvdir ist der Pfad zur Runit-Binärdatei “runsvdir”, die für das Verwalten und Überwachen der Dienste in /var/service verantwortlich ist. Wenn ein solcher Dienst gefunden wird, ruft “runsvdir” das entsprechende “runsv”-Kommando auf, das den Prozess-Supervisor “runsv” startet und den Dienst überwacht. Auf diese Weise arbeiten “runsvdir” und “runsv” zusammen, um eine effiziente Verwaltung und Überwachung aller Runit-Dienste in /var/service zu gewährleisten. Das “&amp;” am Ende des Befehls bewirkt, dass das Kommando im Hintergrund ausgeführt wird, um den Systemstart nicht zu blockieren.</p>
+<ul>
+<li class="has-line-data" data-line-start="254" data-line-end="256">Speichern der Änderungen:</li>
+</ul>
+<p class="has-line-data" data-line-start="256" data-line-end="257">Nachdem die Anpassungen vorgenommen wurden, wird die rc.local-Datei gespeichert und der Texteditor wird geschlossen.</p>
+<ul>
+<li class="has-line-data" data-line-start="258" data-line-end="260">Reboot des Systems:</li>
+</ul>
+<p class="has-line-data" data-line-start="260" data-line-end="261">Nachdem die rc.local-Datei erfolgreich angepasst wurde, wird das System neu gestartet, damit Runit und die von ihm verwalteten Dienste beim Hochfahren des Systems automatisch gestartet werden.</p>
+<ul>
+<li class="has-line-data" data-line-start="262" data-line-end="264">Wichtigkeit der Anpassung der rc.local-Datei:</li>
+</ul>
+<p class="has-line-data" data-line-start="264" data-line-end="265">Die Anpassung der rc.local-Datei ist von entscheidender Bedeutung, um Runit beim Systemstart zu aktivieren und die Überwachung unserer Dienste in /var/service zu ermöglichen. Durch diese Anpassungen wird gewährleistet, dass die Dienste bereits vor dem Login-Prozess gestartet und überwacht werden, was die Verfügbarkeit und Stabilität unseres Servers oder Systems verbessert. Die korrekte Konfiguration der rc.local-Datei in Verbindung mit den “run”-Dateien von Runit bietet eine effiziente und zuverlässige Lösung für das Daemon-Management auf dem FreeBSD-System.</p>
+<h1 class="code-line" data-line-start=266 data-line-end=267><a id="Anpassung_der_rcconfDatei_fr_Runit_266"></a>Anpassung der rc.conf-Datei für Runit:</h1>
+<p class="has-line-data" data-line-start="268" data-line-end="269">Nach der erfolgreichen Installation und Konfiguration von Runit als Init-System und Prozess-Supervisor übernimmt Runit die Verwaltung der Dienste, einschließlich des Apache HTTP Servers. In diesem Fall ist die vorherige Einstellung apache24_enable=“yes” in der rc.conf nicht mehr erforderlich und kann auskommentiert oder entfernt werden. Dadurch entfällt die Notwendigkeit, spezifische Dienste in der rc.conf zu aktivieren, da Runit diese Funktionen übernimmt und die Dienste zuverlässig verwaltet.</p>
+<h1 class="code-line" data-line-start=270 data-line-end=271><a id="Erstellung_der_runDatei_und_ihre_Bedeutung_270"></a>Erstellung der “run”-Datei und ihre Bedeutung:</h1>
+<p class="has-line-data" data-line-start="272" data-line-end="275">Nach der erfolgreichen Installation von Runit auf dem FreeBSD-System wird für jeden Dienst, der mit Runit verwaltet werden soll, eine “run”-Datei erstellt. Diese Datei ist entscheidend, da sie die Anweisungen enthält, die Runit ausführt, um den entsprechenden Dienst zu starten und zu verwalten.<br>
+Die Verzeichnisstruktur für die Dienste sieht wie folgt aus: Nach der Installation von Runit wird das Verzeichnis “/var/service/apache24” erstellt, um die Runit-Dienste zu speichern. Jeder Unterordner in diesem Verzeichnis repräsentiert einen Dienst, der von Runit verwaltet wird. Um einen Dienst zu konfigurieren, wird ein Verzeichnis mit dem entsprechenden Dienstnamen innerhalb von “/var/service/apache24” erstellt.<br>
+In jedem Dienstverzeichnis wird eine Datei namens “run” erstellt. Diese “run”-Datei enthält die Befehle, die von Runit ausgeführt werden, um den Dienst zu starten und zu überwachen. Jede “run”-Datei ist spezifisch für den zugehörigen Dienst und enthält Anweisungen, wie der Dienst gestartet, beendet und überwacht werden soll.</p>
+<p class="has-line-data" data-line-start="276" data-line-end="277">Die “run”-Datei ist ein Shell-Skript, das den Apache Webserver mithilfe von Daemontools und chpst (Change Process State) startet und verwaltet. Der Inhalt der “run”-Datei sieht folgendermaßen aus:</p>
+<pre><code class="has-line-data" data-line-start="278" data-line-end="280">#!/bin/sh
+</code></pre>
+<p class="has-line-data" data-line-start="280" data-line-end="281">Dies ist die sogenannte “Shebang”-Zeile und gibt an, dass das Skript mit der Shell /bin/sh ausgeführt werden soll.</p>
+<pre><code class="has-line-data" data-line-start="282" data-line-end="284">exec 2&gt;&amp;1
+</code></pre>
+<p class="has-line-data" data-line-start="284" data-line-end="285">Mit dieser Zeile wird die Standardfehlerausgabe (STDERR) des Skripts auf die Standardausgabe (STDOUT) umgeleitet. Dadurch werden Fehlermeldungen und Ausgaben, die normalerweise auf STDERR erscheinen würden, zusammen mit den normalen Ausgaben auf STDOUT angezeigt.</p>
+<pre><code class="has-line-data" data-line-start="286" data-line-end="288">exec env -i /usr/local/bin/chpst -P
+</code></pre>
+<p class="has-line-data" data-line-start="288" data-line-end="289">Hier wird das Programm chpst mit bestimmten Parametern und dem Apache Webserver (/usr/local/sbin/httpd) ausgeführt. Chpst wird verwendet, um den Webserver in einer kontrollierten Umgebung zu starten. Die Bedeutung der Parameter ist wie folgt:</p>
+<ul>
+<li class="has-line-data" data-line-start="290" data-line-end="291">P: Setzt die Prozessgruppe des Webserver-Prozesses, was für die Prozesskontrolle durch Daemontools wichtig ist und gibt, an, dass der Prent Prozess des ausführbarenden Programms nicht geändert werden soll.</li>
+<li class="has-line-data" data-line-start="291" data-line-end="292">/usr/local/sbin/httpd: Der Pfad zum Apache Webserver-Programm.</li>
+<li class="has-line-data" data-line-start="292" data-line-end="293">-f /usr/local/etc/apache24/httpd.conf: Gibt die Konfigurationsdatei httpd.conf an, die vom Webserver verwendet werden soll.</li>
+<li class="has-line-data" data-line-start="293" data-line-end="294">-DFOREGROUND: Startet den Webserver im Vordergrund und hält das Skript offen, solange der Webserver läuft.</li>
+</ul>
+<pre><code class="has-line-data" data-line-start="295" data-line-end="297">2&gt;&amp;1
+</code></pre>
+<p class="has-line-data" data-line-start="297" data-line-end="298">Dies ist erneut eine Umleitung, die sicherstellt, dass sowohl die Standardausgabe als auch die Standardfehlerausgabe in der gleichen Datei landen, nämlich der Datei, die in Daemontools verwendet wird, um die Ausgabe des laufenden Prozesses zu protokollieren.</p>
+<ul>
+<li class="has-line-data" data-line-start="299" data-line-end="301">Starten und Überwachen des Dienstes:</li>
+</ul>
+<p class="has-line-data" data-line-start="301" data-line-end="302">Nachdem die “run”-Datei erstellt wurde, übernimmt Runit die Kontrolle über den Dienst. Mithilfe der Informationen aus der “run”-Datei startet Runit den Dienst und überwacht ihn kontinuierlich, um sicherzustellen, dass er ordnungsgemäß ausgeführt wird. Falls der Dienst aus irgendeinem Grund beendet wird, wird Runit ihn automatisch neu starten, um die Verfügbarkeit und Stabilität des Dienstes zu gewährleisten. Dieses automatische Neustartverhalten von Runit trägt dazu bei, dass der Dienst zuverlässig und ohne längere Ausfallzeiten zur Verfügung steht. Dies ist besonders wichtig für eine reibungslose Funktionsweise des Systems und für eine effiziente Verwaltung der Dienste auf dem FreeBSD-System.</p>
+<ul>
+<li class="has-line-data" data-line-start="303" data-line-end="305">Manuelles Starten und Überwachen eines Runit-Dienstes mit sv-Befehlen:</li>
+</ul>
+<p class="has-line-data" data-line-start="305" data-line-end="306">Die folgende Anleitung beschreibt die grundlegenden sv-Befehle, mit den einen Runit-Dienst manuell gestartet, überwacht, gestoppt und neu gestartet werden kann. Diese Befehle ermöglichen es, die Kontrolle über die Dienste auf dem FreeBSD-System zu haben und sicherzustellen, dass sie ordnungsgemäß funktionieren.</p>
+<ol>
+<li class="has-line-data" data-line-start="307" data-line-end="309">Dienst manuell starten</li>
+</ol>
+<p class="has-line-data" data-line-start="309" data-line-end="310">Um einen Runit-Dienst manuell zu starten, wird der Befehl sv start &lt;dienstname&gt; verwendet:</p>
+<pre><code class="has-line-data" data-line-start="311" data-line-end="313">sv start /var/service/apache24
+</code></pre>
+<ol start="2">
+<li class="has-line-data" data-line-start="313" data-line-end="315">Status des Dienstes überprüfen</li>
+</ol>
+<p class="has-line-data" data-line-start="315" data-line-end="316">Um den Status eines Dienstes zu überprüfen, wird der Befehl sv status &lt;dienstname&gt; verwendet:</p>
+<pre><code class="has-line-data" data-line-start="317" data-line-end="319">sv status /var/service/apache24
+</code></pre>
+<p class="has-line-data" data-line-start="319" data-line-end="320">Der Befehl zeigt den aktuellen Status des Dienstes an, ob er läuft oder gestoppt ist.</p>
+<ol start="3">
+<li class="has-line-data" data-line-start="321" data-line-end="323">Dienst stoppen</li>
+</ol>
+<p class="has-line-data" data-line-start="323" data-line-end="324">Um einen Dienst zu stoppen, wird der Befehl sv stop &lt;dienstname&gt; verwendet:</p>
+<pre><code class="has-line-data" data-line-start="325" data-line-end="327">sv stop /var/service/apache24
+</code></pre>
+<ol start="4">
+<li class="has-line-data" data-line-start="327" data-line-end="329">Dienst neu starten</li>
+</ol>
+<p class="has-line-data" data-line-start="329" data-line-end="330">Um den Dienst neuzustarten, wird der Befehl sv restart &lt;dienstname&gt; verwendet:</p>
+<pre><code class="has-line-data" data-line-start="332" data-line-end="334">sv restart /var/service/apache24
+</code></pre>
+<ul>
+<li class="has-line-data" data-line-start="335" data-line-end="337">Wichtiger Hinweis:</li>
+</ul>
+<p class="has-line-data" data-line-start="337" data-line-end="338">Die “run”-Skriptdatei für Runit ist auf der offiziellen Website &quot;<a href="http://smarden.org">http://smarden.org</a>&quot; verfügbar, von der Runit heruntergeladen wurde. Es ist wichtig, sicherzustellen, dass die “run”-Datei entsprechend den Anforderungen der Anwendung und des Dienstes angepasst wird, bevor Runit gestartet und der Dienst überwacht wird. Eine sorgfältige Konfiguration der “run”-Datei ermöglicht eine optimale Leistung und Stabilität des Dienstes.</p>
+<h1 class="code-line" data-line-start=339 data-line-end=340><a id="Hierarchische_Prozessdarstellung_mit_pstree_339"></a>Hierarchische Prozessdarstellung mit “pstree”</h1>
+<p class="has-line-data" data-line-start="341" data-line-end="343">Diese Ansicht zeigt eine Hierarchie von Prozessen und die entsprechenden Prozesse, die unter jedem übergeordneten Prozess ausgeführt werden. Der Apache-Webserver wird von Runit gesteuert, dargestellt durch einen Prozessbaum. Der Prozess „runsv apache24“ ist für die Überwachung des Apache-Webservers verantwortlich, und die unten aufgeführten „httpd“-Prozesse sind tatsächliche Instanzen des Apache-Webservers, die als Reaktion auf Dienstanfragen ausgeführt werden.<br>
+Es sind auch andere ausgeführte Systemdienste zu sehen, z.B. dhclient, syslogd, sshd, cron, sendmail usw. Jeder Prozess hat eine bestimmte Aufgabe, die für das reibungslose Funktionieren des Systems wichtig ist.</p>
+<blockquote>
+<p class="has-line-data" data-line-start="344" data-line-end="372">-+= 00001 root /sbin/init<br>
+|–= 00413 root dhclient: system.syslog (dhclient)<br>
+|–= 00416 root dhclient: em0 [priv] (dhclient)<br>
+|–= 00477 _dhcp dhclient: em0 (dhclient)<br>
+|–= 00478 root /sbin/devd<br>
+|–= 00675 root /usr/sbin/syslogd -s<br>
+|–= 00778 root sshd: /usr/sbin/sshd [listener] 0 of 10-100 startups (sshd)<br>
+|–= 00782 root /usr/sbin/cron -s<br>
+|–= 00795 root sendmail: accepting connections (sendmail)<br>
+|–= 00798 smmsp sendmail: Queue <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3240475c5c5740720202">[email&#160;protected]</a>:30:00 for /var/spool/clientmqueue (sendmail)<br>
+|-+= 00743 root /command/runsvdir /var/service<br>
+| -± 00747 root runsv apache24<br>
+| -+= 00751 root /usr/local/sbin/httpd -f /usr/local/etc/apache24/httpd.conf -DFOREGROUND<br>
+| |— 00775 www /usr/local/sbin/httpd -f /usr/local/etc/apache24/httpd.conf -DFOREGROUND<br>
+| |— 00776 www /usr/local/sbin/httpd -f /usr/local/etc/apache24/httpd.conf -DFOREGROUND<br>
+| |— 00777 www /usr/local/sbin/httpd -f /usr/local/etc/apache24/httpd.conf -DFOREGROUND<br>
+| — 00832 www /usr/local/sbin/httpd -f /usr/local/etc/apache24/httpd.conf -DFOREGROUND<br>
+|-+= 00816 root login [pam] (login)<br>
+| -+= 00824 root -csh (csh)<br>
+| -+= 00876 root pstree<br>
+| — 00877 root ps -axwwo user,pid,ppid,pgid,command<br>
+|–= 00817 root /usr/libexec/getty Pc ttyv1<br>
+|–= 00818 root /usr/libexec/getty Pc ttyv2<br>
+|–= 00819 root /usr/libexec/getty Pc ttyv3<br>
+|–= 00820 root /usr/libexec/getty Pc ttyv4<br>
+|–= 00821 root /usr/libexec/getty Pc ttyv5<br>
+|–= 00822 root /usr/libexec/getty Pc ttyv6<br>
+–= 00823 root /usr/libexec/getty Pc ttyv7</p>
+</blockquote>
+<p class="has-line-data" data-line-start="373" data-line-end="374">Die mit pstree dargestellte Prozesshierarchie zeigt den Prozess mit PID 00743 als Elternelement und führt den Befehl /command/runsvdir /var/service aus. Unten ist der Prozess mit PID 00747, auf dem runsv apache24 ausgeführt wird, und unten ist der Prozess mit PID 00751, 00775, 00776, 00777 und 00832, auf dem alle /usr/local/sbin/httpd -f /usr/local/ etc/apache24/ httpd .conf ausgeführt werden -DFOREGROUND“ und werden als direkte Kinder des Prozesses mit der PID 00747 ausgeführt.</p>
+<h1 class="code-line" data-line-start=376 data-line-end=377><a id="SSLTLSZertifikate__Bedeutung_und_Zweck_376"></a>SSL/TLS-Zertifikate - Bedeutung und Zweck:</h1>
+<p class="has-line-data" data-line-start="378" data-line-end="379">Die Datenübertragung im Internet wird durch digitale Zertifikate, sogenannte SSL/TLS-Zertifikate, gesichert und verschlüsselt. Zweck und Bedeutung von SSL/TLS-Zertifikaten werden im Folgenden erläutert:</p>
+<ul>
+<li class="has-line-data" data-line-start="380" data-line-end="382">Datenverschlüsselung:</li>
+</ul>
+<p class="has-line-data" data-line-start="382" data-line-end="383">Der Hauptzweck eines SSL/TLS-Zertifikats besteht darin, die Kommunikation zwischen dem Webbrowser des Benutzers und dem Webserver zu verschlüsseln. Durch die Verwendung von SSL/TLS wird sichergestellt, dass vertrauliche Informationen wie Benutzernamen, Passwörter, Kreditkarteninformationen und persönliche Daten während der Übertragung vor unbefugtem Zugriff geschützt sind. Die Daten werden verschlüsselt übertragen und können nur von autorisiertem Personal entschlüsselt werden, wodurch das Risiko, dass Daten von Dritten gelesen und abgefangen werden, erheblich reduziert wird.</p>
+<ul>
+<li class="has-line-data" data-line-start="384" data-line-end="386">Authentifizierung der Serveridentität:</li>
+</ul>
+<p class="has-line-data" data-line-start="386" data-line-end="387">Mit SSL/TLS-Zertifikaten kann ein Webserver authentifiziert und überprüft werden, ob ein Benutzer tatsächlich mit der beabsichtigten Website oder dem beabsichtigten Dienst interagiert. Zertifikate werden von vertrauenswürdigen Zertifizierungsstellen (Certification Authorities-CAs) ausgestellt, um die Identität des Zertifikatsinhabers zu überprüfen.Wenn ein Webserver ein gültiges SSL/TLS-Zertifikat besitzt, kann der Webbrowser die Authentizität des Servers überprüfen und sicherstellen, dass die Verbindung sicher und vertrauenswürdig ist.</p>
+<ul>
+<li class="has-line-data" data-line-start="388" data-line-end="390">Vertrauenswürdige Kommunikation:</li>
+</ul>
+<p class="has-line-data" data-line-start="390" data-line-end="391">Um das Vertrauen der Benutzer in Websites zu erhöhen, sind SSL/TLS-Zertifikate von entscheidender Bedeutung. Die meisten Betriebssysteme und Webbrowser akzeptieren Zertifikate, die von vertrauenswürdigen Zertifizierungsstellen ausgestellt wurden. Dieses visuelle Feedback stärkt das Vertrauen der Benutzer, indem es versichert, dass die Informationen sicher sind und dass sie eine legitime und sichere Website anzeigen.</p>
+<ul>
+<li class="has-line-data" data-line-start="392" data-line-end="394">SEO-Vorteile:</li>
+</ul>
+<p class="has-line-data" data-line-start="394" data-line-end="395">Suchmaschinen wie Google bevorzugen Websites, die HTTPS nutzen und nutzen HTTPS als Rankingfaktor. Dadurch können Seiten, die SSL/TLS-Zertifikate verwenden und auf HTTPS umstellen, in den Suchergebnissen besser ranken und eine größere Sichtbarkeit und Reichweite erzielen.</p>
+<h1 class="code-line" data-line-start=396 data-line-end=397><a id="X509Zertifikatserstellung_396"></a>X.509-Zertifikatserstellung</h1>
+<p class="has-line-data" data-line-start="398" data-line-end="399">Zur Generierung des X.509-Zertifikats werden vier Skripte und Konfigurationsdateien von <a href="https://www.fehcom.de/">https://www.fehcom.de/</a> heruntergeladen. Hierzu dienen die folgenden Befehle:</p>
+<pre><code class="has-line-data" data-line-start="401" data-line-end="406">lynx https://www.fehcom.net/make_CA.sh 
+lynx https://www.fehcom.net/make_server.sh 
+lynx https://www.fehcom.net/CA.cfg 
+lynx https://www.fehcom.net/server.cfg
+</code></pre>
+<p class="has-line-data" data-line-start="406" data-line-end="407">Dabei werden die Dateien “CA.cfg” in “rootCA_ECC.cfg” und “server.cfg” in “labpc-116.cfg” mit dem Befehl:</p>
+<pre><code class="has-line-data" data-line-start="409" data-line-end="412">mv sever.cfg labpc-116.cfg
+mv CA.cfg rootCA_ECC.cfg
+</code></pre>
+<p class="has-line-data" data-line-start="412" data-line-end="413">umbenannt. Diese werden zur Generierung von SSL/TLS-Zertifikaten für den Server verwendet.</p>
+<p class="has-line-data" data-line-start="414" data-line-end="415">Nach den Umbenennungen und Anpassungen wird die Dateiberechtigungen für das Skript “make_server.sh” mit dem Befehl:</p>
+<pre><code class="has-line-data" data-line-start="416" data-line-end="418">chmod +x make_server.sh
+</code></pre>
+<p class="has-line-data" data-line-start="418" data-line-end="419">ausgeführt, um das Skript ausführbar zu machen.</p>
+<p class="has-line-data" data-line-start="420" data-line-end="421">Anschließend wird das Skript “make_server.sh” mit dem Befehl:</p>
+<pre><code class="has-line-data" data-line-start="422" data-line-end="424">./make_server.sh labpc-116
+</code></pre>
+<p class="has-line-data" data-line-start="424" data-line-end="425">gestartet. Dadurch werden aufgefordert, zusätzliche Informationen anzugeben, die zum Generieren eines Root Certificate Authority (CA)-Zertifikats erforderlich sind. Nach der Eingabe aller erforderlichen Informationen kann das Skript ein gültiges X.509-Zertifikat für die CA generieren.</p>
+<p class="has-line-data" data-line-start="426" data-line-end="427">Dieser Vorgang generiert ein gültiges X.509-Zertifikat für den „labpc-116“-Server. Mit diesem Zertifikat sind sowohl Authentifizierung als auch die sichere Netzwerkkommunikation möglich. Dadurch wird die Sicherheit und Zuverlässigkeit der Kommunikation mit den Servern verbessert.</p>
+<p class="has-line-data" data-line-start="428" data-line-end="429">Nachdem das Zertifikat für die Root-Zertifizierungsstelle (CA) erfolgreich erstellt wurde, dessen Details und Eigenschaften können angezeigt werden. Dazu wird der folgende Befehl verwendet:</p>
+<pre><code class="has-line-data" data-line-start="431" data-line-end="433">openssl x509 -in labpc-116_ECCert.pem -text -noout | more
+</code></pre>
+<p class="has-line-data" data-line-start="434" data-line-end="435">Dieser Befehl nutzt das OpenSSL-Werkzeug, um das X.509-Zertifikat mit dem Dateinamen “labpc-116_ECCert.pem” im Textformat zu entschlüsseln und anzuzeigen. Dabei werden wichtige Informationen wie der Aussteller, der Inhaber und der Gültigkeitszeitraum des Zertifikats dargestellt. Die Ausgabe könnte möglicherweise sehr umfangreich sein, daher wir der Befehl “more” verwendet, um die Anzeige seitenweise zu ermöglichen und somit eine bessere Übersicht zu erhalten.</p>
+<h1 class="code-line" data-line-start=436 data-line-end=437><a id="Konfiguration_der_httpdconfKonfigurationsdatei_436"></a>Konfiguration der httpd.conf-Konfigurationsdatei:</h1>
+<p class="has-line-data" data-line-start="438" data-line-end="439">Die “httpd.conf”-Datei ist die Hauptkonfigurationsdatei des Apache Webserver und enthält wichtige Einstellungen und Direktiven, die das Verhalten des Servers steuern. Hier ist eine ausführliche Erklärung der einzelnen Abschnitte und Direktiven der “httpd.conf”:</p>
+<ul>
+<li class="has-line-data" data-line-start="440" data-line-end="442">ServerRoot:</li>
+</ul>
+<pre><code class="has-line-data" data-line-start="443" data-line-end="445">ServerRoot &quot;/usr/local&quot;
+</code></pre>
+<p class="has-line-data" data-line-start="446" data-line-end="447">Die ServerRoot-Direktive legt das Basisverzeichnis für den Server fest, in dem der Apache Webserver installiert ist. Hier wird “/usr/local” als Serverstammverzeichnis definiert.</p>
+<ul>
+<li class="has-line-data" data-line-start="448" data-line-end="450">ServerName und Listen:</li>
+</ul>
+<pre><code class="has-line-data" data-line-start="451" data-line-end="455">ServerName localhost
+Listen 80
+Listen 443
+</code></pre>
+<p class="has-line-data" data-line-start="456" data-line-end="457">Die ServerName-Direktive definiert den Standard-Servernamen, der verwendet wird, wenn keine spezifische Servername-Angabe in einem Virtual Host erfolgt. Hier ist der Servername als “localhost” festgelegt.</p>
+<p class="has-line-data" data-line-start="458" data-line-end="459">Die Listen-Direktive gibt an, auf welchen Ports der Server lauschen soll. In diesem Fall lauscht er auf Port 80 für HTTP und auf Port 443 für HTTPS (SSL/TLS).</p>
+<ul>
+<li class="has-line-data" data-line-start="460" data-line-end="461">User und Group:</li>
+<li class="has-line-data" data-line-start="461" data-line-end="462"></li>
+</ul>
+<pre><code class="has-line-data" data-line-start="463" data-line-end="466">User www
+Group www
+</code></pre>
+<p class="has-line-data" data-line-start="467" data-line-end="468">Die User- und Group-Direktiven legen den Benutzernamen und die Gruppe fest, unter denen der Apache-Prozess ausgeführt wird. Hier wird der Benutzer “www” und die Gruppe “www” für den Apache-Prozess verwendet.</p>
+<ul>
+<li class="has-line-data" data-line-start="469" data-line-end="471">DocumentRoot und DirectoryIndex:</li>
+</ul>
+<pre><code class="has-line-data" data-line-start="472" data-line-end="475">DocumentRoot &quot;/usr/local/www/apache24/data&quot;
+DirectoryIndex index.html
+</code></pre>
+<p class="has-line-data" data-line-start="475" data-line-end="476">Die DocumentRoot-Direktive gibt das Standardverzeichnis an, in dem die Inhalte des Servers liegen. Hier wird “/usr/local/www/apache24/data” als das Hauptverzeichnis festgelegt.</p>
+<p class="has-line-data" data-line-start="477" data-line-end="478">Die DirectoryIndex-Direktive gibt die Standarddatei an, die der Server anzeigen soll, wenn keine spezifische Datei angefordert wurde. Hier ist “index.html” als Standarddatei festgelegt.</p>
+<ul>
+<li class="has-line-data" data-line-start="479" data-line-end="481">VirtualHost-Direktiven:</li>
+</ul>
+<p class="has-line-data" data-line-start="481" data-line-end="482">*VirtualHost :80:</p>
+<pre><code class="has-line-data" data-line-start="484" data-line-end="493">&lt;VirtualHost *:80&gt;
+    DocumentRoot &quot;/usr/local/www/iphone&quot;
+    &lt;Directory &quot;/usr/local/www/iphone&quot;&gt;
+        Options FollowSymLinks
+        AllowOverride AuthConfig
+    &lt;/Directory&gt;
+    DirectoryIndex index.html
+&lt;/VirtualHost&gt;
+</code></pre>
+<p class="has-line-data" data-line-start="494" data-line-end="496">Dieser virtuelle Host ist für Port 80 (HTTP) konfiguriert. Hierbei wird keine Verschlüsselung eingesetzt und die Datenübertragung zwischen Webbrowser und Webserver erfolgt im Klartext.Dies bedeutet, dass die übertragenen Daten unverschlüsselt sind und die Gefahr besteht, dass sie von Dritten abgefangen und gelesen werden.<br>
+Das DocumentRoot ist /usr/local/www/iphone und die verzeichnisspezifischen Optionen sind auf /usr/local/www/iphone eingestellt, einschließlich FollowSymLinks und AuthConfig.</p>
+<p class="has-line-data" data-line-start="497" data-line-end="498">*VirtualHost :443:</p>
+<pre><code class="has-line-data" data-line-start="500" data-line-end="512">&lt;VirtualHost *:443&gt;
+    DocumentRoot &quot;/usr/local/www/iphone&quot;
+    &lt;Directory &quot;/usr/local/www/iphone&quot;&gt;
+        Options FollowSymLinks
+        AllowOverride AuthConfig
+    &lt;/Directory&gt;
+    DirectoryIndex index.html
+
+    SSLCertificateFile &quot;/root/labpc-116_ECCert.pem&quot;
+    SSLCertificateKeyFile &quot;/root/labpc-116_ECCkey.pem&quot;
+&lt;/VirtualHost&gt;
+</code></pre>
+<p class="has-line-data" data-line-start="513" data-line-end="516">Dieser virtuelle Server ist auf Port 443 (HTTPS) konfiguriert und stellt eine verschlüsselte Verbindung über SSL/TLS bereit. Die Anweisungen SSLCertificateFile und SSLCertificateKeyFile geben den Pfad zum SSL/TLS-Zertifikat an, das für die Verschlüsselung verwendet wird. Mithilfe dieser Zertifikate verschlüsselt der Webserver die Kommunikation zwischen dem Webbrowser des Benutzers und dem Webserver und gewährleistet so die Sicherheit der übertragenen Daten.<br>
+Das DocumentRoot ist ebenfalls „/usr/local/www/iphone“ und legt die gleichen Verzeichnisoptionen wie im vorherigen virtuellen Host fest.<br>
+Außerdem wird der Pfad für das SSL/TLS-Zertifikat angegeben.</p>
+<ul>
+<li class="has-line-data" data-line-start="517" data-line-end="519">LogLevel, LogFormat, ErrorLog und CustomLog:</li>
+</ul>
+<pre><code class="has-line-data" data-line-start="520" data-line-end="525">LogLevel debug
+LogFormat &quot;%h %l %u %t \&quot;%r\&quot; %&gt;s %b \&quot;%{Referer}i\&quot; \&quot;%{User-Agent}i\&quot;&quot; common
+ErrorLog /var/log/apache/error.log
+CustomLog /var/log/apache/access.log common
+</code></pre>
+<p class="has-line-data" data-line-start="526" data-line-end="527">Die LogLevel-Direktive legt das Protokollierungsniveau für den Server fest. Hier wird “debug” als Protokollierungsniveau verwendet.</p>
+<p class="has-line-data" data-line-start="528" data-line-end="529">Die LogFormat-Direktive definiert das Format für die Zugriffsprotokolle. Hier wird das Format “common” festgelegt.</p>
+<p class="has-line-data" data-line-start="530" data-line-end="531">Die ErrorLog-Direktive gibt den Pfad zur Datei an, in der Apache Fehlerprotokolle protokolliert.</p>
+<p class="has-line-data" data-line-start="532" data-line-end="533">Die CustomLog-Direktive gibt den Pfad zur Datei an, in der Zugriffsprotokolle für den Server protokolliert.</p>
+<ul>
+<li class="has-line-data" data-line-start="534" data-line-end="536">LoadModule:</li>
+</ul>
+<pre><code class="has-line-data" data-line-start="537" data-line-end="545">LoadModule mpm_event_module libexec/apache24/mod_mpm_event.so
+LoadModule log_config_module libexec/apache24/mod_log_config.so
+LoadModule mime_module libexec/apache24/mod_mime.so
+LoadModule authz_core_module libexec/apache24/mod_authz_core.so
+LoadModule dir_module libexec/apache24/mod_dir-so
+LoadModule unixd_module libexec/apache24/mod_unix.so
+LoadModule ssl_module libexec/apache24/mod_ssl.so
+</code></pre>
+<p class="has-line-data" data-line-start="546" data-line-end="547">Sie werden verwendet, um Apache-Module zu laden, die bestimmte Funktionen und Features bereitstellen, die der Webserver benötigt, um verschiedene Aufgaben auszuführen.</p>
+<ol>
+<li class="has-line-data" data-line-start="548" data-line-end="550">mpm_event_module:</li>
+</ol>
+<p class="has-line-data" data-line-start="550" data-line-end="551">Dieses mpm_event_module stellt das Multiprocessing Module (MPM)-Ereignis bereit. Das MPM-Ereignis ermöglicht es dem Apache-Webserver, mehrere Anfragen gleichzeitig in separaten Threads zu verarbeiten. Es bietet eine gute Leistung und Skalierbarkeit, insbesondere für stark ausgelastete Websites.</p>
+<ol start="2">
+<li class="has-line-data" data-line-start="552" data-line-end="554">log_config_module:</li>
+</ol>
+<p class="has-line-data" data-line-start="554" data-line-end="555">Mit dem log_config_module kann die Protokollierungseinstellungen des Apache-Webservers konfiguriert werden. Das Format des Zugriffsprotokolls kann angepasst werden, um verschiedene Informationen über Benutzeranfragen und -aktivitäten zu sammeln.</p>
+<ol start="3">
+<li class="has-line-data" data-line-start="556" data-line-end="558">mime_module:</li>
+</ol>
+<p class="has-line-data" data-line-start="558" data-line-end="559">Das mime_module ist für die Verarbeitung von MIME-Typen (Multipurpose Internet Mail Extensions) verantwortlich. Dadurch kann der Server den richtigen MIME-Typ für Dateien ermitteln und senden, was für Webbrowser wichtig ist, um Dateien richtig zu interpretieren.</p>
+<ol start="4">
+<li class="has-line-data" data-line-start="560" data-line-end="562">authz_core_module:</li>
+</ol>
+<p class="has-line-data" data-line-start="562" data-line-end="563">Das authz_core_module stellt grundlegende Autorisierungs- und Zugriffskontrollfunktionen für den Apache-Webserver bereit. Dadurch können die Zugriffsrichtlinien basierend auf Benutzerberechtigungen und anderen Kriterien konfiguriert werden.</p>
+<ol start="5">
+<li class="has-line-data" data-line-start="564" data-line-end="566">dir_module:</li>
+</ol>
+<p class="has-line-data" data-line-start="566" data-line-end="567">Mit dem dir-module können automatisch Verzeichnislisten erstellen werden, wenn im Verzeichnis keine Indexdatei vorhanden ist. Außerdem können die Einstellungen für bestimmte Ordner angepasst werden.</p>
+<ol start="6">
+<li class="has-line-data" data-line-start="568" data-line-end="570">unixd_module:</li>
+</ol>
+<p class="has-line-data" data-line-start="570" data-line-end="571">Das unixd-module stellt viele der Unix-spezifischen Funktionen bereit, die zum Ausführen des Apache-Webservers auf Unix-basierten Betriebssystemen erforderlich sind.</p>
+<ol start="7">
+<li class="has-line-data" data-line-start="572" data-line-end="574">ssl_module:</li>
+</ol>
+<p class="has-line-data" data-line-start="574" data-line-end="575">Das SSL-module stellt die für SSL/TLS-Verschlüsselung und HTTPS-Verbindungen erforderliche Funktionalität bereit. Dadurch kann der Server SSL/TLS-Zertifikate verwenden, um die Kommunikation zu verschlüsseln und die Sicherheit zwischen dem Server und dem Client zu gewährleisten.</p>
+<p class="has-line-data" data-line-start="576" data-line-end="577">Durch das Laden dieser Module kann der Apache Webserver eine Vielzahl von Funktionen ausführen und eine breite Palette von Webanwendungen unterstützen. Jedes Modul erweitert den Funktionsumfang des Servers und ermöglicht es, verschiedene Aspekte der Serverkonfiguration anzupassen und den Webserver gemäß Ihren Anforderungen und Bedürfnissen zu konfigurieren. Es ist wichtig, nur die benötigten Module zu laden, um die Leistung des Webservers zu optimieren und unnötige Ressourcenverschwendung zu vermeiden.</p>
+<ul>
+<li class="has-line-data" data-line-start="578" data-line-end="580">TypesConfig:</li>
+</ul>
+<p class="has-line-data" data-line-start="580" data-line-end="581">Die TypesConfig-Direktive gibt den Pfad zur Datei mit den MIME-Typen an.</p>
+<p class="has-line-data" data-line-start="582" data-line-end="583">Nachdem die httpd.conf Konfigurationsdatei angepasst wurde, werden die Befehle lynx <a href="https://localhost">https://localhost</a> und lynx localhost:80 ausgeführt, um die Funktionalität und Erreichbarkeit des Apache Webserver zu überprüfen.</p>
+<pre><code class="has-line-data" data-line-start="585" data-line-end="587">lynx https://localhost
+</code></pre>
+<p class="has-line-data" data-line-start="588" data-line-end="589">Mit diesem Befehl wird der Text-Browser lynx verwendet, um die lokale Adresse <a href="https://localhost">https://localhost</a> aufzurufen. Das bedeutet, es wird eine verschlüsselte HTTPS-Verbindung zum Webserver aufgebaut. Da in der httpd.conf ein Virtual Host für den Port 443 (HTTPS) konfiguriert wurde und die entsprechenden SSL/TLS-Zertifikate angegeben wurden, sollte lynx eine erfolgreiche Verbindung zu der Website aufbauen und den Inhalt der Seite anzeigen. Wenn dies gelingt, bestätigt es, dass die SSL/TLS-Verschlüsselung ordnungsgemäß funktioniert und der Webserver auf Anfragen über HTTPS reagiert.</p>
+<pre><code class="has-line-data" data-line-start="591" data-line-end="593">lynx localhost:80
+</code></pre>
+<p class="has-line-data" data-line-start="594" data-line-end="595">Mit diesem Befehl wird der Text-Browser lynx verwendet, um die lokale Adresse localhost:80 aufzurufen. Dieser Aufruf erfolgt über den Standard-HTTP-Port 80, was bedeutet, dass keine Verschlüsselung verwendet wird. Der Webserver sollte auf die Anfrage reagieren und den Inhalt der Seite anzeigen. Wenn dies gelingt, bestätigt es, dass der Webserver auch auf HTTP-Anfragen über den Port 80 reagiert und Websites ohne Verschlüsselung bereitstellt.</p>
+<h1 class="code-line" data-line-start=597 data-line-end=598><a id="Konfiguration_der_LogdateienRotation_in_der_newsyslogconfDatei_597"></a>Konfiguration der Logdateien-Rotation in der newsyslog.conf-Datei</h1>
+<p class="has-line-data" data-line-start="599" data-line-end="601">Der newsyslog Dienst ist dafür verantwortlich, Logdateien zu rotieren, indem er ältere Logdateien archiviert oder löscht und neue Logdateien erstellt. Dadurch wird verhindert, dass Logdateien zu groß werden und unnötig viel Speicherplatz belegen.<br>
+Hier eine allgemeine Erläuterung der Funktion der Datei newsyslog.conf:</p>
+<ol>
+<li class="has-line-data" data-line-start="602" data-line-end="603">Rotationsregeln definieren: Die Datei newsyslog.conf definiert Rotationsregeln für verschiedene Logdateien. Jede Regel gibt an, welche Logdateien wie oft rotiert werden sollen, wie viele Archive erstellt werden sollen und welche Berechtigungen neue Logdateien haben sollten.</li>
+<li class="has-line-data" data-line-start="603" data-line-end="604">Konfiguration der Logdatei: Die Datei newsyslog.conf enthält Zeilen, die den Pfad zur zu rotierenden Protokolldatei auflisten. Diese Zeilen enthalten auch zusätzliche Informationen wie gewünschte Rotationfrequenz, maximale Protokolldateigröße und andere Optionen.</li>
+<li class="has-line-data" data-line-start="604" data-line-end="605">Archivdateiverwaltung: Wenn eine Logdatei geändert wird, erstellt newsyslog Archive, um alte Logeinträge zu speichern. Die Anzahl der Archive und deren Namen werden ebenfalls in der Datei newsyslog.conf angegeben.</li>
+<li class="has-line-data" data-line-start="605" data-line-end="607">Benutzerdefinierte Einstellungen: Mit der Datei newsyslog.conf können Benutzer benutzerdefinierte Einstellungen für einige Logdateien festlegen, die von den Standardregeln abweichen können.</li>
+</ol>
+<p class="has-line-data" data-line-start="607" data-line-end="609">Die Datei newsyslog.conf enthält die Konfiguration zum Rotieren der Logdateien, auch hier sind die gleichen Pfade vorgesehen wie in der Datei httpd.conf. Diese Kopie wird benötigt, damit newsyslog weiß, welche Logdateien rotiert werden müssen.<br>
+Zur Rotation sehen die Einträge in der Datei newsyslog.conf wie folgt aus:</p>
+<pre><code class="has-line-data" data-line-start="611" data-line-end="615">- In der newsyslog.conf Datei
+/var/log/apache/access.log    644  7     *    @T00   JC    /var/run/httpd.pid 
+/var/log/apache/error.log     644  7     *    @T00   JC   /var/run/httpd.pid  
+</code></pre>
+<p class="has-line-data" data-line-start="615" data-line-end="616">Hier ist die Bedeutung jedes Parameters:</p>
+<ol>
+<li class="has-line-data" data-line-start="617" data-line-end="618">/var/log/apache/access.log (logfilename): Dies ist der Pfad zur Logdatei, die rotiert werden soll. In diesem Fall handelt es sich um die Zugriffsprotokolldatei des Apache-HTTP-Servers unter /var/log/apache/access.log.</li>
+<li class="has-line-data" data-line-start="618" data-line-end="619">644 (mode): Dieser Modus wird für neu erstellte Logdateien verwendet, nachdem sie rotiert wurden. In diesem Fall werden neue Logdateien mit der Berechtigung 644 erstellt (von Eigentümer und Gruppe gelesen, aber nicht ausgeführt).</li>
+<li class="has-line-data" data-line-start="619" data-line-end="620">7 (count): Dies ist ein Zählerparameter, der die Anzahl der alten Logdateien angibt, die nach der Rotation erhalten bleiben. In diesem Fall werden 7 alte Logdateien archiviert.</li>
+<li class="has-line-data" data-line-start="620" data-line-end="621">
+<ul>
+<li class="has-line-data" data-line-start="620" data-line-end="621">(size): Der Größenparameter gibt die maximale Größe der Logdatei an, bevor sie rotiert wird. Die Angabe * bedeutet, dass die Datei je nach Größe rotiert wird.</li>
+</ul>
+</li>
+<li class="has-line-data" data-line-start="621" data-line-end="622">@T00 (when): Der Parameter when gibt an, wann die Rotation stattfindet. In diesem Fall wird @T00 verwendet, was bedeutet, dass die Rotation jeden Tag um Mitternacht erfolgt.</li>
+<li class="has-line-data" data-line-start="622" data-line-end="623">JC (flags): Der Flags-Parameter definiert, welche Aktion während der Rotation ausgeführt werden soll. Hier steht JC für „copytruncate“, was bedeutet, dass die Logdatei vor dem Rotieren kopiert und dann gelöscht wird, um Platz für neue Protokolleinträge zu schaffen.</li>
+<li class="has-line-data" data-line-start="623" data-line-end="626">/var/run/httpd.pid (pid_file): Der Parameter enthält den Pfad zur PID-Datei des Apache HTTP Servers.<br>
+Diese PID-Datei wird während der Rotation verwendet, um den Apache-Prozess zu identifizieren und die Registrierung fortzusetzen, ohne den Prozess neu zu starten.</li>
+</ol>
+<h1 class="code-line" data-line-start=626 data-line-end=627><a id="Manpages__Handbuchseiten_fr_UnixKommandos_und_Programme_626"></a>Manpages - Handbuchseiten für Unix-Kommandos und Programme</h1>
+<p class="has-line-data" data-line-start="628" data-line-end="629">sv(8)&quot;, “runsv(8)”, “chpst(8)”, “runit(8)”, “runit-init(8)”, “runsvdir(8)” und “runsvchdir(8)” sind Manpages (Handbuchseiten) für verschiedene Befehle und Programme, die Teil von Runit Supervise sind. Jede Manpage enthält eine detaillierte Beschreibung und Anweisungen zur Verwendung des entsprechenden Befehls. Hier eine kurze Erklärung zu jedem der aufgeführten Befehle:</p>
+<ul>
+<li class="has-line-data" data-line-start="630" data-line-end="632">
+<p class="has-line-data" data-line-start="630" data-line-end="631">“sv(8)”: Das Kommando “sv” wird verwendet, um Runit-Dienste zu verwalten. Es ermöglicht das Starten, Stoppen, Neustarten und Überprüfen des Status von Runit-Diensten. Die Manpage für “sv” enthält detaillierte Informationen zur Verwendung und Syntax dieses Kommandos.</p>
+</li>
+<li class="has-line-data" data-line-start="632" data-line-end="634">
+<p class="has-line-data" data-line-start="632" data-line-end="633">“runsv(8)”: “runsv” ist der Prozess-Supervisor von Runit, die einzelnen Dienste überwacht und bei Bedarf neu startet. Die Manpage für “runsv” beschreibt seine Funktionen und wie man damit Dienste startet und überwacht.</p>
+</li>
+<li class="has-line-data" data-line-start="634" data-line-end="636">
+<p class="has-line-data" data-line-start="634" data-line-end="635">“chpst(8)”: “chpst” ist ein Dienstprogramm, das verwendet wird, um den Kontext und die Umgebung eines Prozesses zu ändern, bevor er gestartet wird. Die Manpage für “chpst” erläutert die Optionen und Funktionen dieses Kommandos.</p>
+</li>
+<li class="has-line-data" data-line-start="636" data-line-end="638">
+<p class="has-line-data" data-line-start="636" data-line-end="637">“runit(8)”: “runit” ist das Hauptprogramm von Runit, das für das Starten des Init-Systems verantwortlich ist. Die Manpage für “runit” bietet Informationen zur Funktionsweise und Konfiguration von Runit als Init-System.</p>
+</li>
+<li class="has-line-data" data-line-start="638" data-line-end="640">
+<p class="has-line-data" data-line-start="638" data-line-end="639">“runit-init(8)”: “runit-init” ist ein alternatives Init-Programm, das verwendet wird, um Runit als Init-System zu starten. Die Manpage für “runit-init” erklärt, wie man Runit als Init-System verwendet.</p>
+</li>
+<li class="has-line-data" data-line-start="640" data-line-end="642">
+<p class="has-line-data" data-line-start="640" data-line-end="641">“runsvdir(8)”: “runsvdir” ist ein Dienstprogramm, das ein Verzeichnis mit Runit-Diensten überwacht und diese startet oder neu startet, falls sie beendet werden. Die Manpage für “runsvdir” beschreibt seine Funktionen und Verwendung.</p>
+</li>
+<li class="has-line-data" data-line-start="642" data-line-end="643">
+<p class="has-line-data" data-line-start="642" data-line-end="643">“runsvchdir(8)”: “runsvchdir” ist ein Dienstprogramm, das das Arbeitsverzeichnis eines Runit-Dienstes ändert. Die Manpage für “runsvchdir” erläutert die Verwendung dieses Kommandos.</p>
+</li>
+</ul>
+<h1 class="code-line" data-line-start=645 data-line-end=646><a id="Befehlsbersicht_der_Kommandozeile_mit_Funktionen_645"></a>Befehlsübersicht der Kommandozeile mit Funktionen</h1>
+<ol>
+<li class="has-line-data" data-line-start="647" data-line-end="651">
+<p class="has-line-data" data-line-start="647" data-line-end="651">htop: Interaktive Prozess-Überwachung:<br>
+-Funktion: Interaktives Prozess-Überwachungstool für die Kommandozeile.<br>
+- Verwendung: Anzeigen von laufenden Prozessen, CPU-Auslastung, Speicherbelegung und Hierarchie.<br>
+- Beispiel: htop</p>
+</li>
+<li class="has-line-data" data-line-start="651" data-line-end="656">
+<p class="has-line-data" data-line-start="651" data-line-end="655">*grep runsv: Durchsuchen von Dateien nach Text:<br>
+-Funktion: Sucht nach dem Text “runsv” in allen Dateien im aktuellen Verzeichnis.<br>
+-Verwendung: Dateiinhalt durchsuchen und Zeilen mit “runsv” anzeigen.<br>
+-Beispiel: grep runsv *</p>
+</li>
+<li class="has-line-data" data-line-start="656" data-line-end="661">
+<p class="has-line-data" data-line-start="656" data-line-end="660">grep runsv | more:<br>
+-Funktion: Sucht nach Zeilen, die “runsv” gefolgt von einem beliebigen Text enthalten.<br>
+-Verwendung: Durchsucht Dateiinhalt und zeigt Ergebnisse seitenweise an.<br>
+-Beispiel: grep runsv* | more</p>
+</li>
+<li class="has-line-data" data-line-start="661" data-line-end="666">
+<p class="has-line-data" data-line-start="661" data-line-end="665">kill: Beenden von Prozessen:<br>
+-Funktion: Beendet (tötet) einen Prozess anhand seiner Prozess-ID (PID).<br>
+-Verwendung: Beendet Prozess sauber oder erzwingt sofortiges Beenden.<br>
+-Beispiel: kill &lt;PID&gt;</p>
+</li>
+<li class="has-line-data" data-line-start="666" data-line-end="671">
+<p class="has-line-data" data-line-start="666" data-line-end="670">ps -aux | grep runsv: Anzeigen von Prozessinformationen:<br>
+-Funktion: Zeigt eine Liste aller Prozesse an und sucht nach “runsv” in der Prozessliste.<br>
+-Verwendung: Anzeigen von Prozessinformationen für alle Benutzer mit “runsv” im Namen.<br>
+-Beispiel: ps -aux | grep runsv</p>
+</li>
+<li class="has-line-data" data-line-start="671" data-line-end="676">
+<p class="has-line-data" data-line-start="671" data-line-end="675">which: Anzeigen des Befehlspfads:<br>
+-Funktion: Zeigt den Pfad einer ausführbaren Datei für den angegebenen Befehl an.<br>
+-Verwendung: Ermittelt den vollen Pfad eines Befehls.<br>
+-Beispiel: which &lt;command&gt;</p>
+</li>
+<li class="has-line-data" data-line-start="676" data-line-end="681">
+<p class="has-line-data" data-line-start="676" data-line-end="680">find: Suchen nach Dateien und Verzeichnissen:<br>
+-Funktion: Sucht Dateien und Verzeichnisse basierend auf verschiedenen Kriterien.<br>
+-Verwendung: Dateien nach Namen, Typ, Größe, Änderungszeit usw. finden.<br>
+-Beispiel: find &lt;directory&gt; -name &lt;filename&gt;</p>
+</li>
+<li class="has-line-data" data-line-start="681" data-line-end="685">
+<p class="has-line-data" data-line-start="681" data-line-end="685">adduser: Hinzufügen neuer Benutzer:<br>
+-Funktion: Fügt einen neuen Benutzer zum System hinzu.<br>
+-Verwendung: Interaktiver Prozess zur Eingabe von Benutzerdetails.<br>
+-Beispiel: adduser &lt;username&gt;</p>
+</li>
+</ol>
+<h1 class="code-line" data-line-start=687 data-line-end=688><a id="Literaturverzeichnis_687"></a>Literaturverzeichnis</h1>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body></html>
